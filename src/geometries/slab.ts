@@ -62,10 +62,10 @@ export const GEOMETRY_SLAB_TOP_NEGATIVE_X: FaceData = {
 // Bottom half slab (occupying the bottom half of a block: y = -0.5 to y = 0)
 export const GEOMETRY_SLAB_BOTTOM_POSITIVE_Y: FaceData = {
   corners: [
-    { pos: [-0.5, 0, -0.5], uv: [0, 0] },
-    { pos: [0.5, 0, -0.5], uv: [1, 0] },
     { pos: [-0.5, 0, 0.5], uv: [0, 1] },
     { pos: [0.5, 0, 0.5], uv: [1, 1] },
+    { pos: [-0.5, 0, -0.5], uv: [0, 0] },
+    { pos: [0.5, 0, -0.5], uv: [1, 0] },
   ]
 };
 
