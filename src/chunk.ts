@@ -42,6 +42,7 @@ export class Chunk {
   private blocks = new Uint8Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
   private mesh: THREE.Mesh | null = null;
   private wireframeMesh: THREE.LineSegments | null = null;
+  private debugMesh: THREE.Mesh | null = null; // added debug mesh
 
   constructor(position: THREE.Vector3) {
     this.position = position;
@@ -79,12 +80,24 @@ export class Chunk {
       scene.remove(this.wireframeMesh);
       this.wireframeMesh.geometry.dispose();
     }
+    if (this.debugMesh) {
+      scene.remove(this.debugMesh);
+      this.debugMesh.geometry.dispose();
+    }
 
     const positions: number[] = [];
     const normals: number[] = [];
     const uvs: number[] = [];
     const indices: number[] = [];
     let vertexCount = 0;
+
+    // Debug (culled) face buffers
+    const debugPositions: number[] = [];
+    const debugNormals: number[] = [];
+    const debugUvs: number[] = [];
+    const debugIndices: number[] = [];
+    let debugVertexCount = 0;
+    const debugOffset = 0.01; // small offset so the red plane is visible
 
     const directions: BlockDirection[] = ['PositiveX', 'NegativeX', 'PositiveY', 'NegativeY', 'PositiveZ', 'NegativeZ'];
     const directionVectors = {
@@ -131,31 +144,72 @@ export class Chunk {
                 vertexCount + 2, vertexCount + 1, vertexCount + 3
               );
               vertexCount += 4;
+            } else {
+              // Culled face: add a small red debug plane slightly offset along the face normal
+              const faceData = currentBlock.getFaceData(direction);
+              if (!faceData) continue;
+
+              const nx = directionVectors[direction][0];
+              const ny = directionVectors[direction][1];
+              const nz = directionVectors[direction][2];
+
+              for (const corner of faceData.corners) {
+                debugPositions.push(
+                  corner.pos[0] + x + nx * debugOffset,
+                  corner.pos[1] + y + ny * debugOffset,
+                  corner.pos[2] + z + nz * debugOffset
+                );
+                debugUvs.push(corner.uv[0], corner.uv[1]);
+                debugNormals.push(nx, ny, nz);
+              }
+
+              debugIndices.push(
+                debugVertexCount + 0, debugVertexCount + 1, debugVertexCount + 2,
+                debugVertexCount + 2, debugVertexCount + 1, debugVertexCount + 3
+              );
+              debugVertexCount += 4;
             }
           }
         }
       }
     }
 
-    if (vertexCount === 0) return;
+    if (vertexCount === 0 && debugVertexCount === 0) return;
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-    geometry.setIndex(indices);
+    // Visible geometry (if any)
+    if (vertexCount > 0) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+      geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      geometry.setIndex(indices);
 
-    const material = new THREE.MeshLambertMaterial({ color: 'gray' });
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
-    scene.add(this.mesh);
+      const material = new THREE.MeshLambertMaterial({ color: 'gray' });
+      this.mesh = new THREE.Mesh(geometry, material);
+      this.mesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
+      scene.add(this.mesh);
 
-    // Wireframe Mesh
-    const edges = new THREE.EdgesGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black wireframe
-    this.wireframeMesh = new THREE.LineSegments(edges, lineMaterial);
-    this.wireframeMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
-    this.wireframeMesh.visible = false; // Initially hidden
-    scene.add(this.wireframeMesh);
+      // Wireframe Mesh
+      const edges = new THREE.EdgesGeometry(geometry);
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black wireframe
+      this.wireframeMesh = new THREE.LineSegments(edges, lineMaterial);
+      this.wireframeMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
+      this.wireframeMesh.visible = false; // Initially hidden
+      scene.add(this.wireframeMesh);
+    }
+
+    // Debug mesh for culled faces
+    if (debugVertexCount > 0) {
+      const debugGeometry = new THREE.BufferGeometry();
+      debugGeometry.setAttribute('position', new THREE.Float32BufferAttribute(debugPositions, 3));
+      debugGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(debugNormals, 3));
+      debugGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(debugUvs, 2));
+      debugGeometry.setIndex(debugIndices);
+
+      const debugMaterial = new THREE.MeshBasicMaterial({ color: 'red', side: THREE.DoubleSide });
+      this.debugMesh = new THREE.Mesh(debugGeometry, debugMaterial);
+      this.debugMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
+      scene.add(this.debugMesh);
+    }
   }
 }
