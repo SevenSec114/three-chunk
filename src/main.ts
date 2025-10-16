@@ -29,15 +29,16 @@ controls.enableDamping = true
 controls.dampingFactor = 0.05
 controls.target.set(0, 0, 0);
 
-// --- World --- 
+// World
 const world = new World(scene);
 
 // Programmatically generate the floor using our new API
 world.setBlock(0, 0, 0, 1); // 1 = Stone
+world.setBlock(0, 0, 1, 1); // 1 = Stone
 // And regenerate the chunk mesh once after all blocks are set
 world.regenerate();
 
-// --- GUI ---
+// GUI
 const gui = new GUI();
 const settings = { wireframe: false };
 gui.add(settings, 'wireframe').onChange((value: boolean) => {
