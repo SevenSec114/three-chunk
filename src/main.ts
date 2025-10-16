@@ -9,7 +9,7 @@ scene.background = new THREE.Color('lightblue');
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(24, 16, 24)
+camera.position.set(5, 5, 5)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -27,22 +27,15 @@ scene.add(directionalLight);
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 controls.dampingFactor = 0.05
-controls.target.set(8, 4, 8);
+controls.target.set(0, 0, 0);
 
 // --- World --- 
 const world = new World(scene);
 
 // Programmatically generate the floor using our new API
-for (let y = 0; y < 8; y++) {
-  for (let x = 0; x < 16; x++) {
-    for (let z = 0; z < 16; z++) {
-      world.setBlock(x, y, z, 1); // 1 = Stone
-    }
-  }
-}
+world.setBlock(0, 0, 0, 1); // 1 = Stone
 // And regenerate the chunk mesh once after all blocks are set
 world.regenerate();
-
 
 // --- GUI ---
 const gui = new GUI();

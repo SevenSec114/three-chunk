@@ -9,15 +9,15 @@ export class World {
     this.scene = scene;
     // Don't generate mesh on initial creation, wait for explicit call
     const chunk = new Chunk(new THREE.Vector3(0, 0, 0));
-    this.chunks.set('0,0,0', chunk);
+    this.chunks.set('0, 0, 0', chunk);
   }
 
   public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number) {
     const chunkX = Math.floor(worldX / CHUNK_WIDTH);
-    const chunkY = Math.floor(worldY / CHUNK_HEIGHT); // Not used yet, but good for later
+    const chunkY = Math.floor(worldY / CHUNK_HEIGHT);
     const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);
 
-    const chunk = this.chunks.get(`${chunkX},${chunkZ}`);
+    const chunk = this.chunks.get(`${chunkX}, ${chunkY}, ${chunkZ}`);
     if (!chunk) {
       return; // Chunk not found
     }
