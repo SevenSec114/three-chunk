@@ -8,7 +8,7 @@ import {
   GEOMETRY_CUBE_NEGATIVE_Z,
   GEOMETRY_CUBE_POSITIVE_X,
   GEOMETRY_CUBE_NEGATIVE_X
-} from '../face';
+} from '../geometries/cube';
 
 /**
  * The abstract class for all full, cubic block types.
