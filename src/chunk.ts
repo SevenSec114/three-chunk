@@ -45,13 +45,13 @@ export class Chunk {
 
   constructor(position: THREE.Vector3) {
     this.position = position;
-    for (let y = 0; y < CHUNK_HEIGHT / 2; y++) {
-      for (let x = 0; x < CHUNK_WIDTH; x++) {
-        for (let z = 0; z < CHUNK_DEPTH; z++) {
-          this.blocks[computeIndex(x, y, z)] = 1; // 1 = Stone
-        }
-      }
+  }
+
+  public setBlock(x: number, y: number, z: number, id: number) {
+    if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
+      return; // Out of bounds
     }
+    this.blocks[computeIndex(x, y, z)] = id;
   }
 
   public toggleWireframe(value: boolean) {
@@ -70,6 +70,16 @@ export class Chunk {
   }
 
   public generateMesh(scene: THREE.Scene) {
+    // Dispose old geometry if it exists
+    if (this.mesh) {
+      scene.remove(this.mesh);
+      this.mesh.geometry.dispose();
+    }
+    if (this.wireframeMesh) {
+      scene.remove(this.wireframeMesh);
+      this.wireframeMesh.geometry.dispose();
+    }
+
     const positions: number[] = [];
     const normals: number[] = [];
     const uvs: number[] = [];

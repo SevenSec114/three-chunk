@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Chunk } from './chunk';
+import { Chunk, CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH } from './chunk';
 
 export class World {
   private scene: THREE.Scene;
@@ -7,7 +7,33 @@ export class World {
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
-    this.generate();
+    // Don't generate mesh on initial creation, wait for explicit call
+    const chunk = new Chunk(new THREE.Vector3(0, 0, 0));
+    this.chunks.set('0,0,0', chunk);
+  }
+
+  public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number) {
+    const chunkX = Math.floor(worldX / CHUNK_WIDTH);
+    const chunkY = Math.floor(worldY / CHUNK_HEIGHT); // Not used yet, but good for later
+    const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);
+
+    const chunk = this.chunks.get(`${chunkX},${chunkZ}`);
+    if (!chunk) {
+      return; // Chunk not found
+    }
+
+    // Robust modulo calculation for local coordinates
+    const localX = ((worldX % CHUNK_WIDTH) + CHUNK_WIDTH) % CHUNK_WIDTH;
+    const localY = ((worldY % CHUNK_HEIGHT) + CHUNK_HEIGHT) % CHUNK_HEIGHT;
+    const localZ = ((worldZ % CHUNK_DEPTH) + CHUNK_DEPTH) % CHUNK_DEPTH;
+
+    chunk.setBlock(localX, localY, localZ, blockId);
+  }
+
+  public regenerate() {
+    for (const chunk of this.chunks.values()) {
+      chunk.generateMesh(this.scene);
+    }
   }
 
   public toggleWireframe(value: boolean) {
@@ -16,13 +42,6 @@ export class World {
     }
   }
 
-  private generate() {
-    // For now, let's just generate a single chunk at the origin
-    const chunk = new Chunk(new THREE.Vector3(0, 0, 0));
-    
-    // Tell the chunk to generate its mesh and add it to the scene
-    chunk.generateMesh(this.scene);
-
-    this.chunks.set('0,0,0', chunk);
-  }
+  // This method is no longer needed as we will call regenerate() from main
+  // private generate() {}
 }

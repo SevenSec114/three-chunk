@@ -32,6 +32,18 @@ controls.target.set(8, 4, 8);
 // --- World --- 
 const world = new World(scene);
 
+// Programmatically generate the floor using our new API
+for (let y = 0; y < 8; y++) {
+  for (let x = 0; x < 16; x++) {
+    for (let z = 0; z < 16; z++) {
+      world.setBlock(x, y, z, 1); // 1 = Stone
+    }
+  }
+}
+// And regenerate the chunk mesh once after all blocks are set
+world.regenerate();
+
+
 // --- GUI ---
 const gui = new GUI();
 const settings = { wireframe: false };
