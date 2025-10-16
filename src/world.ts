@@ -12,7 +12,7 @@ export class World {
     this.chunks.set('0, 0, 0', chunk);
   }
 
-  public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number) {
+  public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number, options?: Record<string, string>) {
     const chunkX = Math.floor(worldX / CHUNK_WIDTH);
     const chunkY = Math.floor(worldY / CHUNK_HEIGHT);
     const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);
@@ -27,7 +27,7 @@ export class World {
     const localY = ((worldY % CHUNK_HEIGHT) + CHUNK_HEIGHT) % CHUNK_HEIGHT;
     const localZ = ((worldZ % CHUNK_DEPTH) + CHUNK_DEPTH) % CHUNK_DEPTH;
 
-    chunk.setBlock(localX, localY, localZ, blockId);
+    chunk.setBlock(localX, localY, localZ, blockId, options);
   }
 
   public regenerate() {

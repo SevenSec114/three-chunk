@@ -1,6 +1,6 @@
 import { Block } from './block';
 import { Cube } from './cube';
-// import { Slab } from './slab'; // Example for later
+import { Slab } from './slab';
 
 // --- CONCRETE BLOCK CLASSES ---
 
@@ -13,12 +13,15 @@ class Stone extends Cube {
   readonly id = 1;
 }
 
+class StoneSlab extends Slab {
+  readonly id = 2;
+}
+
 // --- BLOCK REGISTRY ---
 
 const blockInstances: { [id: number]: Block } = {
   1: new Stone(),
-  // e.g. 2: new Dirt(),
-  // e.g. 3: new StoneSlab(),
+  2: new StoneSlab(),
 };
 
 /**

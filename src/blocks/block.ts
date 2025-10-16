@@ -24,5 +24,5 @@ export abstract class Block {
    * @param direction The face to retrieve data for.
    * @returns The FaceData if the face exists, otherwise null.
    */
-  abstract getFaceData(direction: BlockDirection): FaceData | null;
+  abstract getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData | null;
 }

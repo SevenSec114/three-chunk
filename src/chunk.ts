@@ -37,9 +37,14 @@ function isFaceCoveringBoundary(faceData: FaceData, direction: BlockDirection): 
   }
 }
 
+interface BlockData {
+  id: number;
+  options?: Record<string, string>;
+}
+
 export class Chunk {
   private readonly position: THREE.Vector3;
-  private blocks = new Uint8Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
+  private blocks: (BlockData | null)[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH).fill(null);
   private mesh: THREE.Mesh | null = null;
   private wireframeMesh: THREE.LineSegments | null = null;
   private debugMesh: THREE.Mesh | null = null; // added debug mesh
@@ -48,11 +53,11 @@ export class Chunk {
     this.position = position;
   }
 
-  public setBlock(x: number, y: number, z: number, id: number) {
+  public setBlock(x: number, y: number, z: number, id: number, options?: Record<string, string>) {
     if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
       return; // Out of bounds
     }
-    this.blocks[computeIndex(x, y, z)] = id;
+    this.blocks[computeIndex(x, y, z)] = { id, options };
   }
 
   public toggleWireframe(value: boolean) {
@@ -62,12 +67,17 @@ export class Chunk {
     }
   }
 
-  private getBlock(x: number, y: number, z: number): Block | null {
+  private getBlock(x: number, y: number, z: number): {block: Block | null, options?: Record<string, string>} {
     if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
-      return null; // For now, treat out-of-bounds as air
+      return {block: null}; // For now, treat out-of-bounds as air
     }
-    const blockId = this.blocks[computeIndex(x, y, z)];
-    return getBlock(blockId);
+    const blockData = this.blocks[computeIndex(x, y, z)];
+    if (!blockData) return {block: null};
+    
+    return {
+      block: getBlock(blockData.id),
+      options: blockData.options
+    };
   }
 
   public generateMesh(scene: THREE.Scene) {
@@ -109,12 +119,12 @@ export class Chunk {
     for (let y = 0; y < CHUNK_HEIGHT; y++) {
       for (let x = 0; x < CHUNK_WIDTH; x++) {
         for (let z = 0; z < CHUNK_DEPTH; z++) {
-          const currentBlock = this.getBlock(x, y, z);
+          const {block: currentBlock, options: currentOptions} = this.getBlock(x, y, z);
           if (!currentBlock) continue;
 
           for (const direction of directions) {
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
-            const neighborBlock = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
+            const {block: neighborBlock, options: neighborOptions} = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
 
             let faceIsVisible = false;
             if (!neighborBlock) {
@@ -123,14 +133,14 @@ export class Chunk {
               faceIsVisible = true;
             } else {
               const oppositeDirection: BlockDirection = direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection;
-              const opposingFace = neighborBlock.getFaceData(oppositeDirection);
+              const opposingFace = neighborBlock.getFaceData(oppositeDirection, neighborOptions);
               if (!opposingFace || !isFaceCoveringBoundary(opposingFace, oppositeDirection)) {
                 faceIsVisible = true;
               }
             }
 
             if (faceIsVisible) {
-              const faceData = currentBlock.getFaceData(direction);
+              const faceData = currentBlock.getFaceData(direction, currentOptions);
               if (!faceData) continue;
 
               for (const corner of faceData.corners) {
@@ -146,7 +156,7 @@ export class Chunk {
               vertexCount += 4;
             } else {
               // Culled face: add a small red debug plane slightly offset along the face normal
-              const faceData = currentBlock.getFaceData(direction);
+              const faceData = currentBlock.getFaceData(direction, currentOptions);
               if (!faceData) continue;
 
               const nx = directionVectors[direction][0];

@@ -17,12 +17,12 @@ import {
 export abstract class Cube extends Block {
   getFaceData(direction: BlockDirection): FaceData {
     switch (direction) {
+      case 'PositiveX': return GEOMETRY_CUBE_POSITIVE_X;
+      case 'NegativeX': return GEOMETRY_CUBE_NEGATIVE_X;
       case 'PositiveY': return GEOMETRY_CUBE_POSITIVE_Y;
       case 'NegativeY': return GEOMETRY_CUBE_NEGATIVE_Y;
       case 'PositiveZ': return GEOMETRY_CUBE_POSITIVE_Z;
       case 'NegativeZ': return GEOMETRY_CUBE_NEGATIVE_Z;
-      case 'PositiveX': return GEOMETRY_CUBE_POSITIVE_X;
-      case 'NegativeX': return GEOMETRY_CUBE_NEGATIVE_X;
     }
   }
 }
