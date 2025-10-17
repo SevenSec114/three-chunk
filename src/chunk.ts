@@ -13,12 +13,10 @@ function computeIndex(x: number, y: number, z: number) {
   return y * CHUNK_WIDTH * CHUNK_DEPTH + x * CHUNK_DEPTH + z;
 }
 
-// The analyser function we designed
-function isFaceCoveringBoundary(faceData: FaceData, direction: BlockDirection): boolean {
-  const { corners } = faceData;
+function getFaceBounds(faceData: FaceData) {
   const min = { x: Infinity, y: Infinity, z: Infinity };
   const max = { x: -Infinity, y: -Infinity, z: -Infinity };
-  for (const corner of corners) {
+  for (const corner of faceData.corners) {
     min.x = Math.min(min.x, corner.pos[0]);
     max.x = Math.max(max.x, corner.pos[0]);
     min.y = Math.min(min.y, corner.pos[1]);
@@ -26,15 +24,22 @@ function isFaceCoveringBoundary(faceData: FaceData, direction: BlockDirection): 
     min.z = Math.min(min.z, corner.pos[2]);
     max.z = Math.max(max.z, corner.pos[2]);
   }
+  return { min, max };
+}
+
+function isFaceTouchingBoundary(faceData: FaceData, direction: BlockDirection): boolean {
+  const { corners } = faceData;
+  if (corners.length === 0) return false;
 
   switch (direction) {
-    case 'PositiveY': return min.y === 0.5 && max.y === 0.5 && min.x === -0.5 && max.x === 0.5 && min.z === -0.5 && max.z === 0.5;
-    case 'NegativeY': return min.y === -0.5 && max.y === -0.5 && min.x === -0.5 && max.x === 0.5 && min.z === -0.5 && max.z === 0.5;
-    case 'PositiveZ': return min.z === 0.5 && max.z === 0.5 && min.x === -0.5 && max.x === 0.5 && min.y === -0.5 && max.y === 0.5;
-    case 'NegativeZ': return min.z === -0.5 && max.z === -0.5 && min.x === -0.5 && max.x === 0.5 && min.y === -0.5 && max.y === 0.5;
-    case 'PositiveX': return min.x === 0.5 && max.x === 0.5 && min.y === -0.5 && max.y === 0.5 && min.z === -0.5 && max.z === 0.5;
-    case 'NegativeX': return min.x === -0.5 && max.x === -0.5 && min.y === -0.5 && max.y === 0.5 && min.z === -0.5 && max.z === 0.5;
+    case 'PositiveY': return corners.every(c => c.pos[1] === 0.5);
+    case 'NegativeY': return corners.every(c => c.pos[1] === -0.5);
+    case 'PositiveZ': return corners.every(c => c.pos[2] === 0.5);
+    case 'NegativeZ': return corners.every(c => c.pos[2] === -0.5);
+    case 'PositiveX': return corners.every(c => c.pos[0] === 0.5);
+    case 'NegativeX': return corners.every(c => c.pos[0] === -0.5);
   }
+  return false; // Should be unreachable
 }
 
 interface BlockData {
@@ -129,25 +134,45 @@ export class Chunk {
             const faceData = currentBlock.getFaceData(direction, currentOptions);
             if (!faceData) continue;
 
-            let faceIsVisible = false;
-            if (!neighborBlock) {
-              faceIsVisible = true;
-            } else if (!neighborBlock.isOpaque) {
-              faceIsVisible = true;
-            } else {
+            let faceIsVisible = true; // Default to visible
+            if (neighborBlock && neighborBlock.isOpaque) {
               const oppositeDirection: BlockDirection = direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection;
               const opposingFace = neighborBlock.getFaceData(oppositeDirection, neighborOptions);
 
-              const currentFaceIsBoundary = isFaceCoveringBoundary(faceData, direction);
-              const opposingFaceIsBoundary = opposingFace && isFaceCoveringBoundary(opposingFace, oppositeDirection);
+              if (opposingFace) {
+                const currentTouchesBoundary = isFaceTouchingBoundary(faceData, direction);
+                const opposingTouchesBoundary = isFaceTouchingBoundary(opposingFace, oppositeDirection);
 
-              if (!(currentFaceIsBoundary && opposingFaceIsBoundary)) {
-                faceIsVisible = true;
+                if (currentTouchesBoundary && opposingTouchesBoundary) {
+                  const currentBounds = getFaceBounds(faceData);
+                  const opposingBounds = getFaceBounds(opposingFace);
+
+                  let isOccluded = false;
+                  if (direction.includes('X')) {
+                    isOccluded = currentBounds.min.y >= opposingBounds.min.y &&
+                                 currentBounds.max.y <= opposingBounds.max.y &&
+                                 currentBounds.min.z >= opposingBounds.min.z &&
+                                 currentBounds.max.z <= opposingBounds.max.z;
+                  } else if (direction.includes('Y')) {
+                    isOccluded = currentBounds.min.x >= opposingBounds.min.x &&
+                                 currentBounds.max.x <= opposingBounds.max.x &&
+                                 currentBounds.min.z >= opposingBounds.min.z &&
+                                 currentBounds.max.z <= opposingBounds.max.z;
+                  } else { // Z
+                    isOccluded = currentBounds.min.x >= opposingBounds.min.x &&
+                                 currentBounds.max.x <= opposingBounds.max.x &&
+                                 currentBounds.min.y >= opposingBounds.min.y &&
+                                 currentBounds.max.y <= opposingBounds.max.y;
+                  }
+
+                  if (isOccluded) {
+                    faceIsVisible = false; // Cull the face
+                  }
+                }
               }
             }
 
             if (faceIsVisible) {
-
               for (const corner of faceData.corners) {
                 positions.push(corner.pos[0] + x, corner.pos[1] + y, corner.pos[2] + z);
                 uvs.push(corner.uv[0], corner.uv[1]);

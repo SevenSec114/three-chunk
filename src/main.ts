@@ -34,8 +34,7 @@ const world = new World(scene);
 
 // Programmatically generate the floor using our new API
 world.setBlock(0, 0, 0, 2, { 'position': 'top' });
-world.setBlock(0, 1, 0, 1);
-world.setBlock(0, 2, 0, 2, { 'position': 'bottom' });
+world.setBlock(0, 0, 0, 2, { 'position': 'bottom' });
 // And regenerate the chunk mesh once after all blocks are set
 world.regenerate();
 
