@@ -29,7 +29,6 @@ function getFaceBounds(faceData: FaceData) {
 
 function isFaceTouchingBoundary(faceData: FaceData, direction: BlockDirection): boolean {
   const { corners } = faceData;
-  if (corners.length === 0) return false;
 
   switch (direction) {
     case 'PositiveY': return corners.every(c => c.pos[1] === 0.5);
@@ -39,7 +38,6 @@ function isFaceTouchingBoundary(faceData: FaceData, direction: BlockDirection): 
     case 'PositiveX': return corners.every(c => c.pos[0] === 0.5);
     case 'NegativeX': return corners.every(c => c.pos[0] === -0.5);
   }
-  return false; // Should be unreachable
 }
 
 interface BlockData {
