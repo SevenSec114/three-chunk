@@ -126,6 +126,9 @@ export class Chunk {
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
             const {block: neighborBlock, options: neighborOptions} = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
 
+            const faceData = currentBlock.getFaceData(direction, currentOptions);
+            if (!faceData) continue;
+
             let faceIsVisible = false;
             if (!neighborBlock) {
               faceIsVisible = true;
@@ -134,14 +137,16 @@ export class Chunk {
             } else {
               const oppositeDirection: BlockDirection = direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection;
               const opposingFace = neighborBlock.getFaceData(oppositeDirection, neighborOptions);
-              if (!opposingFace || !isFaceCoveringBoundary(opposingFace, oppositeDirection)) {
+
+              const currentFaceIsBoundary = isFaceCoveringBoundary(faceData, direction);
+              const opposingFaceIsBoundary = opposingFace && isFaceCoveringBoundary(opposingFace, oppositeDirection);
+
+              if (!(currentFaceIsBoundary && opposingFaceIsBoundary)) {
                 faceIsVisible = true;
               }
             }
 
             if (faceIsVisible) {
-              const faceData = currentBlock.getFaceData(direction, currentOptions);
-              if (!faceData) continue;
 
               for (const corner of faceData.corners) {
                 positions.push(corner.pos[0] + x, corner.pos[1] + y, corner.pos[2] + z);
