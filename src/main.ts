@@ -34,6 +34,8 @@ const world = new World(scene);
 
 // Programmatically generate the floor using our new API
 world.setBlock(0, 2, 0, 2, { 'position': 'bottom' });
+world.setBlock(1, 2, 0, 2, { 'position': 'bottom' });
+world.setBlock(1, 1, 0, 2, { 'position': 'bottom' });
 world.setBlock(0, 1, 0, 1);
 world.setBlock(0, 1, 1, 1);
 world.setBlock(0, 0, 0, 2, { 'position': 'top' });

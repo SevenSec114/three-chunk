@@ -1,10 +1,12 @@
 import type { FaceData } from './face';
 import type { BlockDirection } from './blocks/block';
 
+const EPSILON = 0.0001;
+
 type Point2D = { x: number, y: number };
 
 /**
- * The main culling logic (V3 - Hybrid Algorithm).
+ * The main culling logic (V4 - Hybrid Algorithm with Planarity Check).
  * It uses a fast path for simple cases and a slow path for complex cases.
  */
 export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], direction: BlockDirection): boolean {
@@ -13,10 +15,24 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
   }
 
   // --- Fast Path: Bounding Box Check ---
-  // This is fast and handles the most common cases (full face vs full face) perfectly.
   const currentBounds = getFaceBounds(currentFace);
   for (const opposingFace of opposingFaces) {
     const opposingBounds = getFaceBounds(opposingFace);
+
+    // 1. Co-planarity and contact check
+    let areTouching = false;
+    switch (direction) {
+      case 'PositiveY': areTouching = Math.abs(currentBounds.max.y - 0.5) < EPSILON && Math.abs(opposingBounds.min.y + 0.5) < EPSILON; break;
+      case 'NegativeY': areTouching = Math.abs(currentBounds.min.y + 0.5) < EPSILON && Math.abs(opposingBounds.max.y - 0.5) < EPSILON; break;
+      case 'PositiveX': areTouching = Math.abs(currentBounds.max.x - 0.5) < EPSILON && Math.abs(opposingBounds.min.x + 0.5) < EPSILON; break;
+      case 'NegativeX': areTouching = Math.abs(currentBounds.min.x + 0.5) < EPSILON && Math.abs(opposingBounds.max.x - 0.5) < EPSILON; break;
+      case 'PositiveZ': areTouching = Math.abs(currentBounds.max.z - 0.5) < EPSILON && Math.abs(opposingBounds.min.z + 0.5) < EPSILON; break;
+      case 'NegativeZ': areTouching = Math.abs(currentBounds.min.z + 0.5) < EPSILON && Math.abs(opposingBounds.max.z - 0.5) < EPSILON; break;
+    }
+
+    if (!areTouching) continue; // If they aren't touching, they can't occlude in the fast path.
+
+    // 2. 2D Projection check (only if they are touching)
     let isSubset = false;
     if (direction.includes('X')) {
         isSubset = currentBounds.min.y >= opposingBounds.min.y && currentBounds.max.y <= opposingBounds.max.y &&
@@ -28,13 +44,10 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
         isSubset = currentBounds.min.x >= opposingBounds.min.x && currentBounds.max.x <= opposingBounds.max.x &&
                    currentBounds.min.y >= opposingBounds.min.y && currentBounds.max.y <= opposingBounds.max.y;
     }
-    if (isSubset) return true; // If fully contained in any opposing box, it's definitely occluded.
+    if (isSubset) return true; // If touching and fully contained, it's occluded.
   }
 
   // --- Slow Path: 'Survivor' Point-in-Polygon Check ---
-  // This is more expensive but correctly handles partial occlusion for complex shapes.
-  // We only run this if the fast path couldn't prove occlusion.
-
   const currentPolygon = projectTo2D(currentFace.corners, direction);
   const opposingPolygons = opposingFaces.map(f => projectTo2D(f.corners, direction));
 
@@ -44,10 +57,9 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
     for (const opposingPolygon of opposingPolygons) {
       if (isPointInPolygon(vertex, opposingPolygon)) {
         isOccludedByAnyOpposing = true;
-        break; // This vertex is occluded, check the next vertex.
+        break;
       }
     }
-    // If we found a vertex that is not occluded by ANY opposing face, it's visible.
     if (!isOccludedByAnyOpposing) {
       return false; // Short-circuit: Found a visible part.
     }
@@ -73,7 +85,6 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
     }
   }
 
-  // If all checks fail to prove visibility, it implies full occlusion by a complex combination.
   return true;
 }
 

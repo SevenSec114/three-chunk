@@ -3,6 +3,7 @@ import { getBlock } from './blocks/registry';
 import { Block } from './blocks/block';
 import type { BlockDirection } from './blocks/block';
 import { isOccluded } from './culling';
+import { DebugMeshGenerator } from './debug-mesh';
 
 export const CHUNK_WIDTH = 16;
 export const CHUNK_HEIGHT = 16;
@@ -23,7 +24,7 @@ export class Chunk {
   private blocks: (BlockData | null)[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH).fill(null);
   private mesh: THREE.Mesh | null = null;
   private wireframeMesh: THREE.LineSegments | null = null;
-  private debugMesh: THREE.Mesh | null = null; // added debug mesh
+  private debugMesh: THREE.Mesh | null = null;
 
   constructor(position: THREE.Vector3) {
     this.position = position;
@@ -77,13 +78,7 @@ export class Chunk {
     const indices: number[] = [];
     let vertexCount = 0;
 
-    // Debug (culled) face buffers
-    const debugPositions: number[] = [];
-    const debugNormals: number[] = [];
-    const debugUvs: number[] = [];
-    const debugIndices: number[] = [];
-    let debugVertexCount = 0;
-    const debugOffset = 0.01; // small offset so the red plane is visible
+    const debugMeshGenerator = new DebugMeshGenerator();
 
     const directions: BlockDirection[] = ['PositiveX', 'NegativeX', 'PositiveY', 'NegativeY', 'PositiveZ', 'NegativeZ'];
     const directionVectors = {
@@ -125,22 +120,7 @@ export class Chunk {
                 );
                 vertexCount += 4;
               } else {
-                // Culled face: add a small red debug plane
-                const nx = directionVectors[direction][0];
-                const ny = directionVectors[direction][1];
-                const nz = directionVectors[direction][2];
-
-                for (const corner of faceData.corners) {
-                  debugPositions.push(corner.pos[0] + x + nx * debugOffset, corner.pos[1] + y + ny * debugOffset, corner.pos[2] + z + nz * debugOffset);
-                  debugUvs.push(corner.uv[0], corner.uv[1]);
-                  debugNormals.push(nx, ny, nz);
-                }
-
-                debugIndices.push(
-                  debugVertexCount + 0, debugVertexCount + 1, debugVertexCount + 2,
-                  debugVertexCount + 2, debugVertexCount + 1, debugVertexCount + 3
-                );
-                debugVertexCount += 4;
+                debugMeshGenerator.addCulledFace(faceData, x, y, z, direction);
               }
             }
           }
@@ -148,9 +128,7 @@ export class Chunk {
       }
     }
 
-    if (vertexCount === 0 && debugVertexCount === 0) return;
-
-    // Visible geometry
+    // Build main mesh
     if (vertexCount > 0) {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -172,18 +150,7 @@ export class Chunk {
       scene.add(this.wireframeMesh);
     }
 
-    // Debug mesh for culled faces
-    if (debugVertexCount > 0) {
-      const debugGeometry = new THREE.BufferGeometry();
-      debugGeometry.setAttribute('position', new THREE.Float32BufferAttribute(debugPositions, 3));
-      debugGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(debugNormals, 3));
-      debugGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(debugUvs, 2));
-      debugGeometry.setIndex(debugIndices);
-
-      const debugMaterial = new THREE.MeshBasicMaterial({ color: 'red', side: THREE.DoubleSide });
-      this.debugMesh = new THREE.Mesh(debugGeometry, debugMaterial);
-      this.debugMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
-      scene.add(this.debugMesh);
-    }
+    // Build debug mesh
+    this.debugMesh = debugMeshGenerator.buildMesh(scene, this.position);
   }
 }
