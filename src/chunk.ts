@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { getBlock } from './blocks/registry';
 import { Block } from './blocks/block';
 import type { BlockDirection } from './blocks/block';
-import type { FaceData } from './face';
+import { isOccluded } from './culling';
 
 export const CHUNK_WIDTH = 16;
 export const CHUNK_HEIGHT = 16;
@@ -11,33 +11,6 @@ export const CHUNK_DEPTH = 16;
 // Helper function to compute an index into the 1D blocks array
 function computeIndex(x: number, y: number, z: number) {
   return y * CHUNK_WIDTH * CHUNK_DEPTH + x * CHUNK_DEPTH + z;
-}
-
-function getFaceBounds(faceData: FaceData) {
-  const min = { x: Infinity, y: Infinity, z: Infinity };
-  const max = { x: -Infinity, y: -Infinity, z: -Infinity };
-  for (const corner of faceData.corners) {
-    min.x = Math.min(min.x, corner.pos[0]);
-    max.x = Math.max(max.x, corner.pos[0]);
-    min.y = Math.min(min.y, corner.pos[1]);
-    max.y = Math.max(max.y, corner.pos[1]);
-    min.z = Math.min(min.z, corner.pos[2]);
-    max.z = Math.max(max.z, corner.pos[2]);
-  }
-  return { min, max };
-}
-
-function isFaceTouchingBoundary(faceData: FaceData, direction: BlockDirection): boolean {
-  const { corners } = faceData;
-
-  switch (direction) {
-    case 'PositiveY': return corners.every(c => c.pos[1] === 0.5);
-    case 'NegativeY': return corners.every(c => c.pos[1] === -0.5);
-    case 'PositiveZ': return corners.every(c => c.pos[2] === 0.5);
-    case 'NegativeZ': return corners.every(c => c.pos[2] === -0.5);
-    case 'PositiveX': return corners.every(c => c.pos[0] === 0.5);
-    case 'NegativeX': return corners.every(c => c.pos[0] === -0.5);
-  }
 }
 
 interface BlockData {
@@ -126,86 +99,49 @@ export class Chunk {
           if (!currentBlock) continue;
 
           for (const direction of directions) {
+            const currentFaces = currentBlock.getFaceData(direction, currentOptions);
+            if (currentFaces.length === 0) continue;
+
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
             const {block: neighborBlock, options: neighborOptions} = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
 
-            const faceData = currentBlock.getFaceData(direction, currentOptions);
-            if (!faceData) continue;
+            const opposingFaces = (neighborBlock && neighborBlock.isOpaque) 
+              ? neighborBlock.getFaceData(direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection, neighborOptions)
+              : [];
 
-            let faceIsVisible = true; // Default to visible
-            if (neighborBlock && neighborBlock.isOpaque) {
-              const oppositeDirection: BlockDirection = direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection;
-              const opposingFace = neighborBlock.getFaceData(oppositeDirection, neighborOptions);
+            for (const faceData of currentFaces) {
+              const faceIsVisible = !isOccluded(faceData, opposingFaces, direction);
 
-              if (opposingFace) {
-                const currentTouchesBoundary = isFaceTouchingBoundary(faceData, direction);
-                const opposingTouchesBoundary = isFaceTouchingBoundary(opposingFace, oppositeDirection);
-
-                if (currentTouchesBoundary && opposingTouchesBoundary) {
-                  const currentBounds = getFaceBounds(faceData);
-                  const opposingBounds = getFaceBounds(opposingFace);
-
-                  let isOccluded = false;
-                  if (direction.includes('X')) {
-                    isOccluded = currentBounds.min.y >= opposingBounds.min.y &&
-                                 currentBounds.max.y <= opposingBounds.max.y &&
-                                 currentBounds.min.z >= opposingBounds.min.z &&
-                                 currentBounds.max.z <= opposingBounds.max.z;
-                  } else if (direction.includes('Y')) {
-                    isOccluded = currentBounds.min.x >= opposingBounds.min.x &&
-                                 currentBounds.max.x <= opposingBounds.max.x &&
-                                 currentBounds.min.z >= opposingBounds.min.z &&
-                                 currentBounds.max.z <= opposingBounds.max.z;
-                  } else { // Z
-                    isOccluded = currentBounds.min.x >= opposingBounds.min.x &&
-                                 currentBounds.max.x <= opposingBounds.max.x &&
-                                 currentBounds.min.y >= opposingBounds.min.y &&
-                                 currentBounds.max.y <= opposingBounds.max.y;
-                  }
-
-                  if (isOccluded) {
-                    faceIsVisible = false; // Cull the face
-                  }
+              if (faceIsVisible) {
+                for (const corner of faceData.corners) {
+                  positions.push(corner.pos[0] + x, corner.pos[1] + y, corner.pos[2] + z);
+                  uvs.push(corner.uv[0], corner.uv[1]);
+                  normals.push(directionVectors[direction][0], directionVectors[direction][1], directionVectors[direction][2]);
                 }
-              }
-            }
 
-            if (faceIsVisible) {
-              for (const corner of faceData.corners) {
-                positions.push(corner.pos[0] + x, corner.pos[1] + y, corner.pos[2] + z);
-                uvs.push(corner.uv[0], corner.uv[1]);
-                normals.push(directionVectors[direction][0], directionVectors[direction][1], directionVectors[direction][2]);
-              }
-
-              indices.push(
-                vertexCount + 0, vertexCount + 1, vertexCount + 2,
-                vertexCount + 2, vertexCount + 1, vertexCount + 3
-              );
-              vertexCount += 4;
-            } else {
-              // Culled face: add a small red debug plane slightly offset along the face normal
-              const faceData = currentBlock.getFaceData(direction, currentOptions);
-              if (!faceData) continue;
-
-              const nx = directionVectors[direction][0];
-              const ny = directionVectors[direction][1];
-              const nz = directionVectors[direction][2];
-
-              for (const corner of faceData.corners) {
-                debugPositions.push(
-                  corner.pos[0] + x + nx * debugOffset,
-                  corner.pos[1] + y + ny * debugOffset,
-                  corner.pos[2] + z + nz * debugOffset
+                indices.push(
+                  vertexCount + 0, vertexCount + 1, vertexCount + 2,
+                  vertexCount + 2, vertexCount + 1, vertexCount + 3
                 );
-                debugUvs.push(corner.uv[0], corner.uv[1]);
-                debugNormals.push(nx, ny, nz);
-              }
+                vertexCount += 4;
+              } else {
+                // Culled face: add a small red debug plane
+                const nx = directionVectors[direction][0];
+                const ny = directionVectors[direction][1];
+                const nz = directionVectors[direction][2];
 
-              debugIndices.push(
-                debugVertexCount + 0, debugVertexCount + 1, debugVertexCount + 2,
-                debugVertexCount + 2, debugVertexCount + 1, debugVertexCount + 3
-              );
-              debugVertexCount += 4;
+                for (const corner of faceData.corners) {
+                  debugPositions.push(corner.pos[0] + x + nx * debugOffset, corner.pos[1] + y + ny * debugOffset, corner.pos[2] + z + nz * debugOffset);
+                  debugUvs.push(corner.uv[0], corner.uv[1]);
+                  debugNormals.push(nx, ny, nz);
+                }
+
+                debugIndices.push(
+                  debugVertexCount + 0, debugVertexCount + 1, debugVertexCount + 2,
+                  debugVertexCount + 2, debugVertexCount + 1, debugVertexCount + 3
+                );
+                debugVertexCount += 4;
+              }
             }
           }
         }
@@ -214,7 +150,7 @@ export class Chunk {
 
     if (vertexCount === 0 && debugVertexCount === 0) return;
 
-    // Visible geometry (if any)
+    // Visible geometry
     if (vertexCount > 0) {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -229,10 +165,10 @@ export class Chunk {
 
       // Wireframe Mesh
       const edges = new THREE.EdgesGeometry(geometry);
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black wireframe
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
       this.wireframeMesh = new THREE.LineSegments(edges, lineMaterial);
       this.wireframeMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
-      this.wireframeMesh.visible = false; // Initially hidden
+      this.wireframeMesh.visible = false;
       scene.add(this.wireframeMesh);
     }
 

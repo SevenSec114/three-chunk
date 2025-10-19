@@ -20,9 +20,10 @@ export abstract class Block {
 
   /**
    * Retrieves the geometric data for a specific face of the block.
+   * A block can have multiple geometric faces on one block face.
    * This is the core method used by the mesher to build the world.
    * @param direction The face to retrieve data for.
-   * @returns The FaceData if the face exists, otherwise null.
+   * @returns An array of FaceData for the given face. Can be an empty array.
    */
-  abstract getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData | null;
+  abstract getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[];
 }

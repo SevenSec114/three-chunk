@@ -21,25 +21,26 @@ import {
  * It implements getFaceData to return the geometry for either top or bottom slabs.
  */
 export abstract class Slab extends Block {
-  getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData {
+  getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[] {
     if (options?.position === 'top') {
       switch (direction) {
-        case 'PositiveX': return GEOMETRY_SLAB_TOP_POSITIVE_X;
-        case 'NegativeX': return GEOMETRY_SLAB_TOP_NEGATIVE_X;
-        case 'PositiveY': return GEOMETRY_SLAB_TOP_POSITIVE_Y;
-        case 'NegativeY': return GEOMETRY_SLAB_TOP_NEGATIVE_Y;
-        case 'PositiveZ': return GEOMETRY_SLAB_TOP_POSITIVE_Z;
-        case 'NegativeZ': return GEOMETRY_SLAB_TOP_NEGATIVE_Z;
+        case 'PositiveX': return [GEOMETRY_SLAB_TOP_POSITIVE_X];
+        case 'NegativeX': return [GEOMETRY_SLAB_TOP_NEGATIVE_X];
+        case 'PositiveY': return [GEOMETRY_SLAB_TOP_POSITIVE_Y];
+        case 'NegativeY': return [GEOMETRY_SLAB_TOP_NEGATIVE_Y];
+        case 'PositiveZ': return [GEOMETRY_SLAB_TOP_POSITIVE_Z];
+        case 'NegativeZ': return [GEOMETRY_SLAB_TOP_NEGATIVE_Z];
       }
     } else {
       switch (direction) {
-        case 'PositiveX': return GEOMETRY_SLAB_BOTTOM_POSITIVE_X;
-        case 'NegativeX': return GEOMETRY_SLAB_BOTTOM_NEGATIVE_X;
-        case 'PositiveY': return GEOMETRY_SLAB_BOTTOM_POSITIVE_Y;
-        case 'NegativeY': return GEOMETRY_SLAB_BOTTOM_NEGATIVE_Y;
-        case 'PositiveZ': return GEOMETRY_SLAB_BOTTOM_POSITIVE_Z;
-        case 'NegativeZ': return GEOMETRY_SLAB_BOTTOM_NEGATIVE_Z;
+        case 'PositiveX': return [GEOMETRY_SLAB_BOTTOM_POSITIVE_X];
+        case 'NegativeX': return [GEOMETRY_SLAB_BOTTOM_NEGATIVE_X];
+        case 'PositiveY': return [GEOMETRY_SLAB_BOTTOM_POSITIVE_Y];
+        case 'NegativeY': return [GEOMETRY_SLAB_BOTTOM_NEGATIVE_Y];
+        case 'PositiveZ': return [GEOMETRY_SLAB_BOTTOM_POSITIVE_Z];
+        case 'NegativeZ': return [GEOMETRY_SLAB_BOTTOM_NEGATIVE_Z];
       }
     }
+    return [];
   }
 }
