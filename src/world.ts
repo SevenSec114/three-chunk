@@ -4,6 +4,7 @@ import { Chunk, CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH } from './chunk';
 export class World {
   private scene: THREE.Scene;
   private chunks = new Map<string, Chunk>();
+  private showChunkBounds = false;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -38,6 +39,61 @@ export class World {
   public toggleWireframe(value: boolean) {
     for (const chunk of this.chunks.values()) {
       chunk.toggleWireframe(value);
+    }
+  }
+
+  public toggleChunkBounds(value: boolean) {
+    this.showChunkBounds = value;
+    if (!value) {
+      for (const chunk of this.chunks.values()) {
+        chunk.toggleChunkBounds(false);
+      }
+    }
+  }
+
+  /**
+   * Update chunk bounds for camera
+   * 
+   * @param cameraPosition
+   */
+  public updateChunkBoundsForCamera(cameraPosition: THREE.Vector3) {
+    if (!this.showChunkBounds) return;
+
+    // Calculate camera chunk position
+    const camChunkX = Math.floor(cameraPosition.x / CHUNK_WIDTH);
+    const camChunkY = Math.floor(cameraPosition.y / CHUNK_HEIGHT);
+    const camChunkZ = Math.floor(cameraPosition.z / CHUNK_DEPTH);
+
+    // Show chunks around camera
+    for (let x = camChunkX - 1; x <= camChunkX + 1; x++) {
+      for (let y = camChunkY - 1; y <= camChunkY + 1; y++) {
+        for (let z = camChunkZ - 1; z <= camChunkZ + 1; z++) {
+          let chunk = this.chunks.get(`${x}, ${y}, ${z}`);
+          if (!chunk) {
+            chunk = new Chunk(this.scene, new THREE.Vector3(x, y, z));
+            this.chunks.set(`${x}, ${y}, ${z}`, chunk);
+          }
+          
+          chunk.toggleChunkBounds(true);
+        }
+      }
+    }
+    
+    // Hide other chunks' bound
+    for (const [key, chunk] of this.chunks) {
+      const coords = key.split(',').map(coord => parseInt(coord.trim()));
+      const chunkX = coords[0];
+      const chunkY = coords[1];
+      const chunkZ = coords[2];
+      
+      const inRange = 
+        chunkX >= camChunkX - 1 && chunkX <= camChunkX + 1 &&
+        chunkY >= camChunkY - 1 && chunkY <= camChunkY + 1 &&
+        chunkZ >= camChunkZ - 1 && chunkZ <= camChunkZ + 1;
+        
+      if (!inRange) {
+        chunk.toggleChunkBounds(false);
+      }
     }
   }
 }

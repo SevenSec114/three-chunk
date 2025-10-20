@@ -36,28 +36,35 @@ const world = new World(scene);
 // world.setBlock(0, 2, 0, 2, { 'position': 'bottom' });
 // world.setBlock(1, 2, 0, 2, { 'position': 'bottom' });
 // world.setBlock(1, 1, 0, 2, { 'position': 'bottom' });
-world.setBlock(1, 1, 1, 3, { 'facing': 'north' });
-world.setBlock(0, 1, 1, 1);
-world.setBlock(1, 2, 1, 1);
-world.setBlock(1, 0, 1, 1);
-world.setBlock(1, 1, 0, 1);
-world.setBlock(1, 1, 2, 1);
-world.setBlock(2, 1, 1, 1);
+world.setBlock(0, 0, 0, 3, { 'facing': 'north' });
+world.setBlock(-1, 0, 0, 1);
+world.setBlock(0, 1, 0, 1);
+world.setBlock(0, -1, 0, 1);
+world.setBlock(0, 0, -1, 1);
+world.setBlock(0, 0, 1, 1);
+world.setBlock(1, 0, 0, 1);
 // world.setBlock(0, 0, 0, 2, { 'position': 'top' });
 // And regenerate the chunk mesh once after all blocks are set
 world.regenerate();
 
 // GUI
 const gui = new GUI();
-const settings = { debug: false };
+const settings = { debug: false, showChunkBounds: false };
 gui.add(settings, 'debug').onChange((value: boolean) => {
   world.toggleWireframe(value);
+});
+
+gui.add(settings, 'showChunkBounds').name('Show Chunk Bounds').onChange((value: boolean) => {
+  world.toggleChunkBounds(value);
 });
 
 // Loop rendering
 function animate() {
   requestAnimationFrame(animate)
   controls.update()
+  
+  world.updateChunkBoundsForCamera(camera.position);
+  
   renderer.render(scene, camera)
 }
 animate()

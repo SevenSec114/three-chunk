@@ -27,6 +27,7 @@ export class Chunk {
   private wireframeMesh: THREE.LineSegments | null = null;
   private debugMeshGenerator: DebugMeshGenerator;
   private debugMesh: THREE.Mesh | null = null;
+  private chunkBoundingBox: THREE.LineSegments | null = null; // 添加chunk边界框
 
   constructor(scene: THREE.Scene, position: THREE.Vector3) {
     this.position = position;
@@ -55,6 +56,31 @@ export class Chunk {
         this.scene.remove(this.debugMesh);
         this.debugMesh.geometry.dispose();
       }
+    }
+  }
+
+  /**
+   * Toggle chunk bounds visibility
+   * 
+   * @param value Whether to show wireframe
+   */
+  public toggleChunkBounds(value: boolean) {
+    if (value && !this.chunkBoundingBox) {
+      const boxGeometry = new THREE.BoxGeometry(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH);
+      const boxMaterial = new THREE.LineBasicMaterial({ color: 0xffffff }); // 白色
+      this.chunkBoundingBox = new THREE.LineSegments(
+        new THREE.EdgesGeometry(boxGeometry),
+        boxMaterial
+      );
+      
+      const offset = new THREE.Vector3(CHUNK_WIDTH/2, CHUNK_HEIGHT/2, CHUNK_DEPTH/2);
+      this.chunkBoundingBox.position.copy(this.position).multiplyScalar(CHUNK_WIDTH).add(offset);
+      
+      this.scene.add(this.chunkBoundingBox);
+    } else if (!value && this.chunkBoundingBox) {
+      this.scene.remove(this.chunkBoundingBox);
+      this.chunkBoundingBox.geometry.dispose();
+      this.chunkBoundingBox = null;
     }
   }
 
