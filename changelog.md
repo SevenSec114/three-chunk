@@ -4,9 +4,11 @@
 
 ### Changed
 - Migrate debug planes and wireframe into debug mode
+- Debug planes will now be just for culled faces(front side)
 
 ### Fixed
 - Issue with stair blocks culling
+- Blocks cannot be placed on a negative coords
 
 ## 2025-10-19
 
