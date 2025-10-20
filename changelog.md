@@ -2,9 +2,13 @@
 
 ## 2025-10-20
 
+### Added
+- Chunks' bounds display in debug mode
+
 ### Changed
 - Migrate debug planes and wireframe into debug mode
 - Debug planes will now be just for culled faces(front side)
+- Code structure for geometries' definition
 
 ### Fixed
 - Issue with stair blocks culling
