@@ -70,7 +70,7 @@ export class Chunk {
   public toggleChunkBounds(value: boolean) {
     if (value && !this.chunkBoundingBox) {
       const boxGeometry = new THREE.BoxGeometry(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH);
-      const boxMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+      const boxMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff });
       this.chunkBoundingBox = new THREE.LineSegments(
         new THREE.EdgesGeometry(boxGeometry),
         boxMaterial
@@ -181,14 +181,14 @@ export class Chunk {
       geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
       geometry.setIndex(indices);
 
-      const material = new THREE.MeshLambertMaterial({ color: 'gray' });
+      const material = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
       this.mesh = new THREE.Mesh(geometry, material);
       this.mesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
       this.scene.add(this.mesh);
 
       // Wireframe Mesh
       const edges = new THREE.EdgesGeometry(geometry);
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
       this.wireframeMesh = new THREE.LineSegments(edges, lineMaterial);
       this.wireframeMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
       this.wireframeMesh.visible = false;
