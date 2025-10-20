@@ -18,10 +18,10 @@ export class DebugMeshGenerator {
   private uvs: number[] = [];
   private indices: number[] = [];
   private vertexCount = 0;
-  private readonly offset = 0.01;
 
   /**
    * Adds the geometry for a single culled face to the buffer.
+   * 
    * @param faceData The geometric data of the face.
    * @param x The x-coordinate of the block in the chunk.
    * @param y The y-coordinate of the block in the chunk.
@@ -33,9 +33,9 @@ export class DebugMeshGenerator {
 
     for (const corner of faceData.corners) {
       this.positions.push(
-        corner.pos[0] + x + nx * this.offset,
-        corner.pos[1] + y + ny * this.offset,
-        corner.pos[2] + z + nz * this.offset
+        corner.pos[0] + x,
+        corner.pos[1] + y,
+        corner.pos[2] + z
       );
       this.uvs.push(corner.uv[0], corner.uv[1]);
       this.normals.push(nx, ny, nz);
@@ -50,6 +50,7 @@ export class DebugMeshGenerator {
 
   /**
    * Builds the final THREE.Mesh for the debug geometry and adds it to the scene.
+   * 
    * @param scene The THREE.Scene to add the mesh to.
    * @param chunkPosition The position of the parent chunk.
    * @returns The created THREE.Mesh, or null if there was no debug geometry.

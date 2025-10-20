@@ -32,19 +32,17 @@ controls.target.set(5, 5, 5);
 // World
 const world = new World(scene);
 
-// Programmatically generate the floor using our new API
-// world.setBlock(0, 2, 0, 2, { 'position': 'bottom' });
-// world.setBlock(1, 2, 0, 2, { 'position': 'bottom' });
-// world.setBlock(1, 1, 0, 2, { 'position': 'bottom' });
-world.setBlock(5, 5, 5, 3, { 'facing': 'north' });
-world.setBlock(4, 5, 5, 1);
-world.setBlock(5, 6, 5, 1);
-world.setBlock(5, 4, 5, 1);
-world.setBlock(5, 5, 4, 1);
-world.setBlock(5, 5, 6, 1);
-world.setBlock(6, 5, 5, 1);
-// world.setBlock(0, 0, 0, 2, { 'position': 'top' });
-// And regenerate the chunk mesh once after all blocks are set
+// Block placing
+world.setBlock(5, 5, 5, 3, { 'facing': 'west' });
+world.setBlock(5, 5, 4, 2, { 'position': 'bottom' });
+// world.setBlock(4, 5, 5, 1);
+// world.setBlock(5, 6, 5, 1);
+// world.setBlock(5, 4, 5, 1);
+// world.setBlock(5, 5, 4, 1);
+// world.setBlock(5, 5, 6, 1);
+// world.setBlock(6, 5, 5, 1);
+
+// Regenerate the chunk mesh once after all blocks are set
 world.regenerate();
 
 // GUI

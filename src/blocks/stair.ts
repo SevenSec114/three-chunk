@@ -4,8 +4,8 @@ import type { FaceData } from "../face";
 import { stairGeometries } from "../geometries/stair";
 
 export class StairBlock extends Block {
-  id = 3; // Placeholder ID
-  isOpaque = false; // Stairs are not fully opaque
+  id = 3;
+  isOpaque = true;
 
   getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[] {
     const facing = options?.['facing'] || 'north';
