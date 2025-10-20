@@ -7,9 +7,6 @@ export class World {
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
-    // Don't generate mesh on initial creation, wait for explicit call
-    const chunk = new Chunk(this.scene, new THREE.Vector3(0, 0, 0));
-    this.chunks.set('0, 0, 0', chunk);
   }
 
   public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number, options?: Record<string, string>) {
@@ -17,12 +14,14 @@ export class World {
     const chunkY = Math.floor(worldY / CHUNK_HEIGHT);
     const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);
 
-    const chunk = this.chunks.get(`${chunkX}, ${chunkY}, ${chunkZ}`);
+    // Create chunk if it doesn't exist
+    let chunk = this.chunks.get(`${chunkX}, ${chunkY}, ${chunkZ}`);
     if (!chunk) {
-      return; // Chunk not found
+      chunk = new Chunk(this.scene, new THREE.Vector3(chunkX, chunkY, chunkZ));
+      this.chunks.set(`${chunkX}, ${chunkY}, ${chunkZ}`, chunk);
     }
 
-    // Robust modulo calculation for local coordinates
+    // Modulo calculation for local coordinates
     const localX = ((worldX % CHUNK_WIDTH) + CHUNK_WIDTH) % CHUNK_WIDTH;
     const localY = ((worldY % CHUNK_HEIGHT) + CHUNK_HEIGHT) % CHUNK_HEIGHT;
     const localZ = ((worldZ % CHUNK_DEPTH) + CHUNK_DEPTH) % CHUNK_DEPTH;
@@ -41,7 +40,4 @@ export class World {
       chunk.toggleWireframe(value);
     }
   }
-
-  // This method is no longer needed as we will call regenerate() from main
-  // private generate() {}
 }
