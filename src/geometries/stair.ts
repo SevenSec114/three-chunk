@@ -1,10 +1,6 @@
 import type { FaceData } from '../face';
 import type { BlockDirection } from '../blocks/block';
 
-// This file explicitly defines the geometry for all four stair facings.
-// There is no rotation or transformation logic, only pre-computed, axis-aligned vertex data.
-// This is the most robust and debuggable approach.
-
 // --- North-facing Geometry (Ascends towards -Z) ---
 const north: Record<BlockDirection, FaceData[]> = {
   PositiveX: [
