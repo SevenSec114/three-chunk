@@ -9,7 +9,7 @@ scene.background = new THREE.Color('lightblue');
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(10, 10, 10)
+camera.position.set(5, 5, 5)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -27,22 +27,24 @@ scene.add(directionalLight);
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 controls.dampingFactor = 0.05
-controls.target.set(5, 5, 5);
+controls.target.set(0, 0, 0);
 
 // World
 const world = new World(scene);
 
-// Block placing
-world.setBlock(5, 5, 5, 3, { 'facing': 'west' });
-world.setBlock(5, 5, 4, 2, { 'position': 'bottom' });
-// world.setBlock(4, 5, 5, 1);
-// world.setBlock(5, 6, 5, 1);
-// world.setBlock(5, 4, 5, 1);
-// world.setBlock(5, 5, 4, 1);
-// world.setBlock(5, 5, 6, 1);
-// world.setBlock(6, 5, 5, 1);
-
-// Regenerate the chunk mesh once after all blocks are set
+// Programmatically generate the floor using our new API
+// world.setBlock(0, 2, 0, 2, { 'position': 'bottom' });
+// world.setBlock(1, 2, 0, 2, { 'position': 'bottom' });
+// world.setBlock(1, 1, 0, 2, { 'position': 'bottom' });
+world.setBlock(0, 0, 0, 3, { 'facing': 'north' });
+world.setBlock(-1, 0, 0, 1);
+world.setBlock(0, 1, 0, 1);
+world.setBlock(0, -1, 0, 1);
+world.setBlock(0, 0, -1, 1);
+world.setBlock(0, 0, 1, 1);
+world.setBlock(1, 0, 0, 1);
+// world.setBlock(0, 0, 0, 2, { 'position': 'top' });
+// And regenerate the chunk mesh once after all blocks are set
 world.regenerate();
 
 // GUI

@@ -4,6 +4,7 @@ import { Block } from './blocks/block';
 import type { BlockDirection } from './blocks/block';
 import { isOccluded } from './culling';
 import { DebugMeshGenerator } from './debug-mesh';
+import { World } from './world';
 
 export const CHUNK_WIDTH = 16;
 export const CHUNK_HEIGHT = 16;
@@ -22,6 +23,7 @@ interface BlockData {
 export class Chunk {
   private readonly position: THREE.Vector3;
   private scene: THREE.Scene;
+  private world: World;
   private blocks: (BlockData | null)[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH).fill(null);
   private mesh: THREE.Mesh | null = null;
   private wireframeMesh: THREE.LineSegments | null = null;
@@ -29,7 +31,8 @@ export class Chunk {
   private debugMesh: THREE.Mesh | null = null;
   private chunkBoundingBox: THREE.LineSegments | null = null; // 添加chunk边界框
 
-  constructor(scene: THREE.Scene, position: THREE.Vector3) {
+  constructor(world: World, scene: THREE.Scene, position: THREE.Vector3) {
+    this.world = world;
     this.position = position;
     this.scene = scene
     this.debugMeshGenerator = new DebugMeshGenerator();
@@ -67,15 +70,16 @@ export class Chunk {
   public toggleChunkBounds(value: boolean) {
     if (value && !this.chunkBoundingBox) {
       const boxGeometry = new THREE.BoxGeometry(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH);
-      const boxMaterial = new THREE.LineBasicMaterial({ color: 0xffffff }); // 白色
+      const boxMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
       this.chunkBoundingBox = new THREE.LineSegments(
         new THREE.EdgesGeometry(boxGeometry),
         boxMaterial
       );
-      
-      const offset = new THREE.Vector3(CHUNK_WIDTH/2, CHUNK_HEIGHT/2, CHUNK_DEPTH/2);
+
+      // Set position
+      const offset = new THREE.Vector3(CHUNK_WIDTH / 2, CHUNK_HEIGHT / 2, CHUNK_DEPTH / 2);
       this.chunkBoundingBox.position.copy(this.position).multiplyScalar(CHUNK_WIDTH).add(offset);
-      
+
       this.scene.add(this.chunkBoundingBox);
     } else if (!value && this.chunkBoundingBox) {
       this.scene.remove(this.chunkBoundingBox);
@@ -84,13 +88,16 @@ export class Chunk {
     }
   }
 
-  private getBlock(x: number, y: number, z: number): {block: Block | null, options?: Record<string, string>} {
+  public getBlock(x: number, y: number, z: number): { block: Block | null, options?: Record<string, string> } {
     if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
-      return {block: null}; // For now, treat out-of-bounds as air
+      const worldX = this.position.x * CHUNK_WIDTH + x;
+      const worldY = this.position.y * CHUNK_HEIGHT + y;
+      const worldZ = this.position.z * CHUNK_DEPTH + z;
+      return this.world.getBlock(worldX, worldY, worldZ);
     }
     const blockData = this.blocks[computeIndex(x, y, z)];
-    if (!blockData) return {block: null};
-    
+    if (!blockData) return { block: null };
+
     return {
       block: getBlock(blockData.id),
       options: blockData.options
@@ -128,7 +135,7 @@ export class Chunk {
     for (let y = 0; y < CHUNK_HEIGHT; y++) {
       for (let x = 0; x < CHUNK_WIDTH; x++) {
         for (let z = 0; z < CHUNK_DEPTH; z++) {
-          const {block: currentBlock, options: currentOptions} = this.getBlock(x, y, z);
+          const { block: currentBlock, options: currentOptions } = this.getBlock(x, y, z);
           if (!currentBlock) continue;
 
           for (const direction of directions) {
@@ -136,9 +143,9 @@ export class Chunk {
             if (currentFaces.length === 0) continue;
 
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
-            const {block: neighborBlock, options: neighborOptions} = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
+            const { block: neighborBlock, options: neighborOptions } = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
 
-            const opposingFaces = (neighborBlock && neighborBlock.isOpaque) 
+            const opposingFaces = (neighborBlock && neighborBlock.isOpaque)
               ? neighborBlock.getFaceData(direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection, neighborOptions)
               : [];
 
