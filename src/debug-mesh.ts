@@ -65,7 +65,7 @@ export class DebugMeshGenerator {
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(this.uvs, 2));
     geometry.setIndex(this.indices);
 
-    const material = new THREE.MeshBasicMaterial({ color: 'red', side: THREE.DoubleSide });
+    const material = new THREE.MeshBasicMaterial({ color: 'red', side: THREE.FrontSide });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(chunkPosition).multiplyScalar(16); // CHUNK_WIDTH
     scene.add(mesh);
