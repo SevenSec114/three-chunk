@@ -8,7 +8,7 @@ export class World {
   constructor(scene: THREE.Scene) {
     this.scene = scene;
     // Don't generate mesh on initial creation, wait for explicit call
-    const chunk = new Chunk(new THREE.Vector3(0, 0, 0));
+    const chunk = new Chunk(this.scene, new THREE.Vector3(0, 0, 0));
     this.chunks.set('0, 0, 0', chunk);
   }
 
@@ -32,7 +32,7 @@ export class World {
 
   public regenerate() {
     for (const chunk of this.chunks.values()) {
-      chunk.generateMesh(this.scene);
+      chunk.generateMesh();
     }
   }
 

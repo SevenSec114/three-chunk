@@ -21,13 +21,17 @@ interface BlockData {
 
 export class Chunk {
   private readonly position: THREE.Vector3;
+  private scene: THREE.Scene;
   private blocks: (BlockData | null)[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH).fill(null);
   private mesh: THREE.Mesh | null = null;
   private wireframeMesh: THREE.LineSegments | null = null;
+  private debugMeshGenerator: DebugMeshGenerator;
   private debugMesh: THREE.Mesh | null = null;
 
-  constructor(position: THREE.Vector3) {
+  constructor(scene: THREE.Scene, position: THREE.Vector3) {
     this.position = position;
+    this.scene = scene
+    this.debugMeshGenerator = new DebugMeshGenerator();
   }
 
   public setBlock(x: number, y: number, z: number, id: number, options?: Record<string, string>) {
@@ -41,6 +45,16 @@ export class Chunk {
     if (this.mesh && this.wireframeMesh) {
       this.mesh.visible = !value;
       this.wireframeMesh.visible = value;
+    }
+
+    // Build debug mesh
+    if (value) {
+      this.debugMesh = this.debugMeshGenerator.buildMesh(this.scene, this.position);
+    } else {
+      if (this.debugMesh) {
+        this.scene.remove(this.debugMesh);
+        this.debugMesh.geometry.dispose();
+      }
     }
   }
 
@@ -57,18 +71,18 @@ export class Chunk {
     };
   }
 
-  public generateMesh(scene: THREE.Scene) {
+  public generateMesh() {
     // Dispose old geometry if it exists
     if (this.mesh) {
-      scene.remove(this.mesh);
+      this.scene.remove(this.mesh);
       this.mesh.geometry.dispose();
     }
     if (this.wireframeMesh) {
-      scene.remove(this.wireframeMesh);
+      this.scene.remove(this.wireframeMesh);
       this.wireframeMesh.geometry.dispose();
     }
     if (this.debugMesh) {
-      scene.remove(this.debugMesh);
+      this.scene.remove(this.debugMesh);
       this.debugMesh.geometry.dispose();
     }
 
@@ -77,8 +91,6 @@ export class Chunk {
     const uvs: number[] = [];
     const indices: number[] = [];
     let vertexCount = 0;
-
-    const debugMeshGenerator = new DebugMeshGenerator();
 
     const directions: BlockDirection[] = ['PositiveX', 'NegativeX', 'PositiveY', 'NegativeY', 'PositiveZ', 'NegativeZ'];
     const directionVectors = {
@@ -120,7 +132,7 @@ export class Chunk {
                 );
                 vertexCount += 4;
               } else {
-                debugMeshGenerator.addCulledFace(faceData, x, y, z, direction);
+                this.debugMeshGenerator.addCulledFace(faceData, x, y, z, direction);
               }
             }
           }
@@ -139,7 +151,7 @@ export class Chunk {
       const material = new THREE.MeshLambertMaterial({ color: 'gray' });
       this.mesh = new THREE.Mesh(geometry, material);
       this.mesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
-      scene.add(this.mesh);
+      this.scene.add(this.mesh);
 
       // Wireframe Mesh
       const edges = new THREE.EdgesGeometry(geometry);
@@ -147,10 +159,7 @@ export class Chunk {
       this.wireframeMesh = new THREE.LineSegments(edges, lineMaterial);
       this.wireframeMesh.position.copy(this.position).multiplyScalar(CHUNK_WIDTH);
       this.wireframeMesh.visible = false;
-      scene.add(this.wireframeMesh);
+      this.scene.add(this.wireframeMesh);
     }
-
-    // Build debug mesh
-    this.debugMesh = debugMeshGenerator.buildMesh(scene, this.position);
   }
 }

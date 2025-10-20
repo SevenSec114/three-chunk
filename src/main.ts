@@ -49,8 +49,8 @@ world.regenerate();
 
 // GUI
 const gui = new GUI();
-const settings = { wireframe: false };
-gui.add(settings, 'wireframe').onChange((value: boolean) => {
+const settings = { debug: false };
+gui.add(settings, 'debug').onChange((value: boolean) => {
   world.toggleWireframe(value);
 });
 
