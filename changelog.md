@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-10-21
+### Added
+- Fence geometry's definition
+- Short-circuit logic for face culling(`Visibility: Default | Always` for blocks' faces)
+
 ## 2025-10-20
 
 ### Added
