@@ -1,3 +1,4 @@
+import { Visibility } from '../face';
 import type { FaceData } from '../face';
 import type { BlockDirection } from '../blocks/block';
 
@@ -50,6 +51,7 @@ const north: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.5, 0.0, 0.0], uv: [0, 0.5] },
         { pos: [0.5, 0.0, 0.0], uv: [1, 0.5] },
@@ -151,6 +153,7 @@ const south: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.0, 0.0], uv: [0, 0.5] },
         { pos: [-0.5, 0.0, 0.0], uv: [1, 0.5] },
@@ -244,6 +247,7 @@ const east: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0, 0.0, -0.5], uv: [0, 0.5] },
         { pos: [0.0, 0.0, 0.5], uv: [1, 0.5] },
@@ -345,6 +349,7 @@ const west: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0, 0.0, 0.5], uv: [0, 0.5] },
         { pos: [0.0, 0.0, -0.5], uv: [1, 0.5] },

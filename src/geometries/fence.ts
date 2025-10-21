@@ -5,6 +5,7 @@ import type { BlockDirection } from '../blocks/block';
 const post: Record<BlockDirection, FaceData[]> = {
   PositiveX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.125, -0.5, -0.125], uv: [0, 0] },
         { pos: [0.125, 0.5, -0.125], uv: [0, 1] },
@@ -15,6 +16,7 @@ const post: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, -0.5, 0.125], uv: [0, 0] },
         { pos: [-0.125, 0.5, 0.125], uv: [0, 1] },
@@ -45,6 +47,7 @@ const post: Record<BlockDirection, FaceData[]> = {
   ],
   PositiveZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, -0.5, 0.125], uv: [0, 0] },
         { pos: [0.125, -0.5, 0.125], uv: [0.25, 0] },
@@ -55,6 +58,7 @@ const post: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.125, -0.5, -0.125], uv: [0, 0] },
         { pos: [-0.125, -0.5, -0.125], uv: [0.25, 0] },
