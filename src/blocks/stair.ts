@@ -7,7 +7,7 @@ export class StairBlock extends Block {
   id = 3;
   isOpaque = true;
 
-  getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[] {
+  getFaceData(direction: BlockDirection, options?: Record<string, any>): FaceData[] {
     const facing = options?.['facing'] || 'north';
 
     switch (facing) {

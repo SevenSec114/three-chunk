@@ -19,7 +19,7 @@ export class World {
    * @param worldZ 
    * @returns 
    */
-  public getBlock(worldX: number, worldY: number, worldZ: number): { block: Block | null, options?: Record<string, string> } {
+  public getBlock(worldX: number, worldY: number, worldZ: number): { block: Block | null, options?: Record<string, any> } {
     const chunkX = Math.floor(worldX / CHUNK_WIDTH);
     const chunkY = Math.floor(worldY / CHUNK_HEIGHT);
     const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);
@@ -36,7 +36,7 @@ export class World {
     return chunk.getBlock(localX, localY, localZ);
   }
 
-  public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number, options?: Record<string, string>) {
+  public setBlock(worldX: number, worldY: number, worldZ: number, blockId: number, options?: Record<string, any>) {
     const chunkX = Math.floor(worldX / CHUNK_WIDTH);
     const chunkY = Math.floor(worldY / CHUNK_HEIGHT);
     const chunkZ = Math.floor(worldZ / CHUNK_DEPTH);

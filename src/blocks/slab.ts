@@ -8,7 +8,7 @@ import { slabGeometries } from '../geometries/slab';
  * It implements getFaceData to return the geometry for either top or bottom slabs.
  */
 export abstract class Slab extends Block {
-  getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[] {
+  getFaceData(direction: BlockDirection, options?: Record<string, any>): FaceData[] {
     if (options?.position === 'top') {
       return slabGeometries.top[direction];
     } else {

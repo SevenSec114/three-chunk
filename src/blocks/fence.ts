@@ -7,19 +7,19 @@ export class FenceBlock extends Block {
   id = 4;
   isOpaque = false;
 
-  getFaceData(direction: BlockDirection, options?: Record<string, string>, neighbors?: Record<string, Block | null>): FaceData[] {
+  getFaceData(direction: BlockDirection, options?: Record<string, any>): FaceData[] {
     let faces = fenceGeometries.post[direction] || [];
 
-    if (neighbors?.['PositiveX'] instanceof FenceBlock || neighbors?.['PositiveX']?.isOpaque) {
+    if (options?.neighbors?.['PositiveX'] instanceof FenceBlock || options?.neighbors?.['PositiveX']?.isOpaque) {
       faces = faces.concat(fenceGeometries.arm_east[direction] || []);
     }
-    if (neighbors?.['NegativeX'] instanceof FenceBlock || neighbors?.['NegativeX']?.isOpaque) {
+    if (options?.neighbors?.['NegativeX'] instanceof FenceBlock || options?.neighbors?.['NegativeX']?.isOpaque) {
       faces = faces.concat(fenceGeometries.arm_west[direction] || []);
     }
-    if (neighbors?.['PositiveZ'] instanceof FenceBlock || neighbors?.['PositiveZ']?.isOpaque) {
+    if (options?.neighbors?.['PositiveZ'] instanceof FenceBlock || options?.neighbors?.['PositiveZ']?.isOpaque) {
       faces = faces.concat(fenceGeometries.arm_south[direction] || []);
     }
-    if (neighbors?.['NegativeZ'] instanceof FenceBlock || neighbors?.['NegativeZ']?.isOpaque) {
+    if (options?.neighbors?.['NegativeZ'] instanceof FenceBlock || options?.neighbors?.['NegativeZ']?.isOpaque) {
       faces = faces.concat(fenceGeometries.arm_north[direction] || []);
     }
 

@@ -25,5 +25,5 @@ export abstract class Block {
    * @param direction The face to retrieve data for.
    * @returns An array of FaceData for the given face. Can be an empty array.
    */
-  abstract getFaceData(direction: BlockDirection, options?: Record<string, string>): FaceData[];
+  abstract getFaceData(direction: BlockDirection, options?: Record<string, any>): FaceData[];
 }

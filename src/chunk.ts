@@ -17,7 +17,7 @@ function computeIndex(x: number, y: number, z: number) {
 
 interface BlockData {
   id: number;
-  options?: Record<string, string>;
+  options?: Record<string, any>;
 }
 
 export class Chunk {
@@ -38,7 +38,7 @@ export class Chunk {
     this.debugMeshGenerator = new DebugMeshGenerator();
   }
 
-  public setBlock(x: number, y: number, z: number, id: number, options?: Record<string, string>) {
+  public setBlock(x: number, y: number, z: number, id: number, options?: Record<string, any>) {
     if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
       return; // Out of bounds
     }
@@ -88,7 +88,7 @@ export class Chunk {
     }
   }
 
-  public getBlock(x: number, y: number, z: number): { block: Block | null, options?: Record<string, string> } {
+  public getBlock(x: number, y: number, z: number): { block: Block | null, options?: Record<string, any> } {
     if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
       const worldX = this.position.x * CHUNK_WIDTH + x;
       const worldY = this.position.y * CHUNK_HEIGHT + y;
@@ -135,18 +135,20 @@ export class Chunk {
     for (let y = 0; y < CHUNK_HEIGHT; y++) {
       for (let x = 0; x < CHUNK_WIDTH; x++) {
         for (let z = 0; z < CHUNK_DEPTH; z++) {
-          const { block: currentBlock, options: currentOptions } = this.getBlock(x, y, z);
+          const { block: currentBlock, options: currentOptions = {} } = this.getBlock(x, y, z);
           if (!currentBlock) continue;
 
+          // Get and add neighbors into options
           const neighbors = {
             'PositiveX': this.getBlock(x + 1, y, z).block,
             'NegativeX': this.getBlock(x - 1, y, z).block,
             'PositiveZ': this.getBlock(x, y, z + 1).block,
             'NegativeZ': this.getBlock(x, y, z - 1).block,
           };
+          currentOptions.neighbors = neighbors;
 
           for (const direction of directions) {
-            const currentFaces = currentBlock.getFaceData(direction, currentOptions, neighbors);
+            const currentFaces = currentBlock.getFaceData(direction, currentOptions);
             if (currentFaces.length === 0) continue;
 
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
