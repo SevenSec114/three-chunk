@@ -138,8 +138,15 @@ export class Chunk {
           const { block: currentBlock, options: currentOptions } = this.getBlock(x, y, z);
           if (!currentBlock) continue;
 
+          const neighbors = {
+            'PositiveX': this.getBlock(x + 1, y, z).block,
+            'NegativeX': this.getBlock(x - 1, y, z).block,
+            'PositiveZ': this.getBlock(x, y, z + 1).block,
+            'NegativeZ': this.getBlock(x, y, z - 1).block,
+          };
+
           for (const direction of directions) {
-            const currentFaces = currentBlock.getFaceData(direction, currentOptions);
+            const currentFaces = currentBlock.getFaceData(direction, currentOptions, neighbors);
             if (currentFaces.length === 0) continue;
 
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
