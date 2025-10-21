@@ -1,3 +1,4 @@
+import { Visibility } from './face';
 import type { FaceData } from './face';
 import type { BlockDirection } from './blocks/block';
 
@@ -10,6 +11,10 @@ type Point2D = { x: number, y: number };
  * It uses a fast path for simple cases and a slow path for complex cases.
  */
 export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], direction: BlockDirection): boolean {
+  if (currentFace.visibility === Visibility.Always) {
+    return false;
+  }
+
   if (opposingFaces.length === 0) {
     return false; // Nothing to occlude it
   }

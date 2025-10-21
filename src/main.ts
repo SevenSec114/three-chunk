@@ -37,6 +37,7 @@ world.setBlock(1, 0, 0, 4);
 world.setBlock(0, 0, 0, 4);
 world.setBlock(0, 0, 1, 4);
 world.setBlock(1, 0, 1, 4);
+world.setBlock(1, 1, 1, 1);
 
 // And regenerate the chunk mesh once after all blocks are set
 world.regenerate();

@@ -1,3 +1,4 @@
+import { Visibility } from '../face';
 import type { FaceData } from '../face';
 import type { BlockDirection } from '../blocks/block';
 
@@ -67,6 +68,7 @@ const post: Record<BlockDirection, FaceData[]> = {
 const arm_north: Record<BlockDirection, FaceData[]> = {
   PositiveX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.25, -0.5], uv: [0, 0.1875] },
         { pos: [0.0625, 0.4375, -0.5], uv: [0, 0] },
@@ -75,6 +77,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, -0.125, -0.5], uv: [0, 0.1875] },
         { pos: [0.0625, 0.0625, -0.5], uv: [0, 0] },
@@ -85,6 +88,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.0625, 0.25, -0.125], uv: [0, 0.1875] },
         { pos: [-0.0625, 0.4375, -0.125], uv: [0, 0] },
@@ -93,6 +97,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.0625, -0.125, -0.125], uv: [0, 0.1875] },
         { pos: [-0.0625, 0.0625, -0.125], uv: [0, 0] },
@@ -103,6 +108,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
   ],
   PositiveY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.25, -0.125], uv: [0.125, 0] },
         { pos: [-0.0625, 0.25, -0.125], uv: [0, 0] },
@@ -111,6 +117,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, -0.125, -0.125], uv: [0.125, 0] },
         { pos: [-0.0625, -0.125, -0.125], uv: [0, 0] },
@@ -121,6 +128,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.4375, -0.5], uv: [0.125, 0] },
         { pos: [-0.0625, 0.4375, -0.5], uv: [0, 0] },
@@ -129,6 +137,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.0625, -0.5], uv: [0.125, 0] },
         { pos: [-0.0625, 0.0625, -0.5], uv: [0, 0] },
@@ -144,6 +153,7 @@ const arm_north: Record<BlockDirection, FaceData[]> = {
 const arm_south: Record<BlockDirection, FaceData[]> = {
   PositiveX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.25, 0.125], uv: [0, 0.1875] },
         { pos: [0.0625, 0.4375, 0.125], uv: [0, 0] },
@@ -152,6 +162,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, -0.125, 0.125], uv: [0, 0.1875] },
         { pos: [0.0625, 0.0625, 0.125], uv: [0, 0] },
@@ -162,6 +173,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeX: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.0625, 0.25, 0.5], uv: [0, 0.1875] },
         { pos: [-0.0625, 0.4375, 0.5], uv: [0, 0] },
@@ -170,6 +182,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.0625, -0.125, 0.5], uv: [0, 0.1875] },
         { pos: [-0.0625, 0.0625, 0.5], uv: [0, 0] },
@@ -180,6 +193,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
   ],
   PositiveY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.25, 0.5], uv: [0.125, 0] },
         { pos: [-0.0625, 0.25, 0.5], uv: [0, 0] },
@@ -188,6 +202,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, -0.125, 0.5], uv: [0.125, 0] },
         { pos: [-0.0625, -0.125, 0.5], uv: [0, 0] },
@@ -198,6 +213,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.4375, 0.125], uv: [0.125, 0] },
         { pos: [-0.0625, 0.4375, 0.125], uv: [0, 0] },
@@ -206,6 +222,7 @@ const arm_south: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.0625, 0.0625, 0.125], uv: [0.125, 0] },
         { pos: [-0.0625, 0.0625, 0.125], uv: [0, 0] },
@@ -223,6 +240,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
   NegativeX: [],
   PositiveY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.25, 0.0625], uv: [0.375, 0] },
         { pos: [0.125, 0.25, 0.0625], uv: [0, 0] },
@@ -231,6 +249,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, -0.125, 0.0625], uv: [0.375, 0] },
         { pos: [0.125, -0.125, 0.0625], uv: [0, 0] },
@@ -241,6 +260,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.4375, -0.0625], uv: [0.375, 0] },
         { pos: [0.125, 0.4375, -0.0625], uv: [0, 0] },
@@ -249,6 +269,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.0625, -0.0625], uv: [0.375, 0] },
         { pos: [0.125, 0.0625, -0.0625], uv: [0, 0] },
@@ -259,6 +280,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
   ],
   PositiveZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.4375, 0.0625], uv: [0.375, 0] },
         { pos: [0.125, 0.4375, 0.0625], uv: [0, 0] },
@@ -267,6 +289,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.5, 0.0625, 0.0625], uv: [0.375, 0] },
         { pos: [0.125, 0.0625, 0.0625], uv: [0, 0] },
@@ -277,6 +300,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.125, 0.4375, -0.0625], uv: [0.375, 0] },
         { pos: [0.5, 0.4375, -0.0625], uv: [0, 0] },
@@ -285,6 +309,7 @@ const arm_east: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [0.125, 0.0625, -0.0625], uv: [0.375, 0] },
         { pos: [0.5, 0.0625, -0.0625], uv: [0, 0] },
@@ -300,6 +325,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
   NegativeX: [],
   PositiveY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, 0.25, 0.0625], uv: [0.375, 0] },
         { pos: [-0.5, 0.25, 0.0625], uv: [0, 0] },
@@ -308,6 +334,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, -0.125, 0.0625], uv: [0.375, 0] },
         { pos: [-0.5, -0.125, 0.0625], uv: [0, 0] },
@@ -318,6 +345,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeY: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, 0.4375, -0.0625], uv: [0.375, 0] },
         { pos: [-0.5, 0.4375, -0.0625], uv: [0, 0] },
@@ -326,6 +354,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, 0.0625, -0.0625], uv: [0.375, 0] },
         { pos: [-0.5, 0.0625, -0.0625], uv: [0, 0] },
@@ -336,6 +365,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
   ],
   PositiveZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, 0.4375, 0.0625], uv: [0, 0] },
         { pos: [-0.5, 0.4375, 0.0625], uv: [0.375, 0] },
@@ -344,6 +374,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.125, 0.0625, 0.0625], uv: [0, 0] },
         { pos: [-0.5, 0.0625, 0.0625], uv: [0.375, 0] },
@@ -354,6 +385,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
   ],
   NegativeZ: [
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.5, 0.4375, -0.0625], uv: [0, 0] },
         { pos: [-0.125, 0.4375, -0.0625], uv: [0.375, 0] },
@@ -362,6 +394,7 @@ const arm_west: Record<BlockDirection, FaceData[]> = {
       ]
     },
     {
+      visibility: Visibility.Always,
       corners: [
         { pos: [-0.5, 0.0625, -0.0625], uv: [0, 0] },
         { pos: [-0.125, 0.0625, -0.0625], uv: [0.375, 0] },
