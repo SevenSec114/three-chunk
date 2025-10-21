@@ -62,6 +62,8 @@ export class World {
     }
   }
 
+  //#region Debug Utils
+
   public toggleWireframe(value: boolean) {
     for (const chunk of this.chunks.values()) {
       chunk.toggleWireframe(value);
@@ -123,4 +125,6 @@ export class World {
       }
     }
   }
+
+  //#endregion
 }

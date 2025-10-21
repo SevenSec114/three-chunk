@@ -10,14 +10,14 @@ export const CHUNK_WIDTH = 16;
 export const CHUNK_HEIGHT = 16;
 export const CHUNK_DEPTH = 16;
 
-// Helper function to compute an index into the 1D blocks array
-function computeIndex(x: number, y: number, z: number) {
-  return y * CHUNK_WIDTH * CHUNK_DEPTH + x * CHUNK_DEPTH + z;
-}
-
 interface BlockData {
   id: number;
   options?: Record<string, any>;
+}
+
+// Helper function to compute an index into the 1D blocks array
+function computeIndex(x: number, y: number, z: number) {
+  return y * CHUNK_WIDTH * CHUNK_DEPTH + x * CHUNK_DEPTH + z;
 }
 
 export class Chunk {
@@ -43,49 +43,6 @@ export class Chunk {
       return; // Out of bounds
     }
     this.blocks[computeIndex(x, y, z)] = { id, options };
-  }
-
-  public toggleWireframe(value: boolean) {
-    if (this.mesh && this.wireframeMesh) {
-      this.mesh.visible = !value;
-      this.wireframeMesh.visible = value;
-    }
-
-    // Build debug mesh
-    if (value) {
-      this.debugMesh = this.debugMeshGenerator.buildMesh(this.scene, this.position);
-    } else {
-      if (this.debugMesh) {
-        this.scene.remove(this.debugMesh);
-        this.debugMesh.geometry.dispose();
-      }
-    }
-  }
-
-  /**
-   * Toggle chunk bounds visibility
-   * 
-   * @param value Whether to show wireframe
-   */
-  public toggleChunkBounds(value: boolean) {
-    if (value && !this.chunkBoundingBox) {
-      const boxGeometry = new THREE.BoxGeometry(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH);
-      const boxMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff });
-      this.chunkBoundingBox = new THREE.LineSegments(
-        new THREE.EdgesGeometry(boxGeometry),
-        boxMaterial
-      );
-
-      // Set position
-      const offset = new THREE.Vector3(CHUNK_WIDTH / 2, CHUNK_HEIGHT / 2, CHUNK_DEPTH / 2);
-      this.chunkBoundingBox.position.copy(this.position).multiplyScalar(CHUNK_WIDTH).add(offset);
-
-      this.scene.add(this.chunkBoundingBox);
-    } else if (!value && this.chunkBoundingBox) {
-      this.scene.remove(this.chunkBoundingBox);
-      this.chunkBoundingBox.geometry.dispose();
-      this.chunkBoundingBox = null;
-    }
   }
 
   public getBlock(x: number, y: number, z: number): { block: Block | null, options?: Record<string, any> } {
@@ -158,6 +115,7 @@ export class Chunk {
               ? neighborBlock.getFaceData(direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection, neighborOptions)
               : [];
 
+            // Check if face is visible and add indices into current chunk
             for (const faceData of currentFaces) {
               const faceIsVisible = !isOccluded(faceData, opposingFaces, direction);
 
@@ -174,6 +132,7 @@ export class Chunk {
                 );
                 vertexCount += 4;
               } else {
+                // Invisible faces' vertices will be a debug plane
                 this.debugMeshGenerator.addCulledFace(faceData, x, y, z, direction);
               }
             }
@@ -204,4 +163,51 @@ export class Chunk {
       this.scene.add(this.wireframeMesh);
     }
   }
+
+  //#region Debug Utils
+
+  public toggleWireframe(value: boolean) {
+    if (this.mesh && this.wireframeMesh) {
+      this.mesh.visible = !value;
+      this.wireframeMesh.visible = value;
+    }
+
+    // Build debug mesh
+    if (value) {
+      this.debugMesh = this.debugMeshGenerator.buildMesh(this.scene, this.position);
+    } else {
+      if (this.debugMesh) {
+        this.scene.remove(this.debugMesh);
+        this.debugMesh.geometry.dispose();
+      }
+    }
+  }
+
+  /**
+   * Toggle chunk bounds visibility
+   * 
+   * @param value Whether to show wireframe
+   */
+  public toggleChunkBounds(value: boolean) {
+    if (value && !this.chunkBoundingBox) {
+      const boxGeometry = new THREE.BoxGeometry(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH);
+      const boxMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff });
+      this.chunkBoundingBox = new THREE.LineSegments(
+        new THREE.EdgesGeometry(boxGeometry),
+        boxMaterial
+      );
+
+      // Set position
+      const offset = new THREE.Vector3(CHUNK_WIDTH / 2, CHUNK_HEIGHT / 2, CHUNK_DEPTH / 2);
+      this.chunkBoundingBox.position.copy(this.position).multiplyScalar(CHUNK_WIDTH).add(offset);
+
+      this.scene.add(this.chunkBoundingBox);
+    } else if (!value && this.chunkBoundingBox) {
+      this.scene.remove(this.chunkBoundingBox);
+      this.chunkBoundingBox.geometry.dispose();
+      this.chunkBoundingBox = null;
+    }
+  }
+
+  //#endregion
 }

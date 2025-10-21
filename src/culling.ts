@@ -19,7 +19,9 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
     return false; // Nothing to occlude it
   }
 
-  // --- Fast Path: Bounding Box Check ---
+  //#region Fast Path
+
+  // --- Bounding Box Check ---
   const currentBounds = getFaceBounds(currentFace);
   for (const opposingFace of opposingFaces) {
     const opposingBounds = getFaceBounds(opposingFace);
@@ -52,7 +54,10 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
     if (isSubset) return true; // If touching and fully contained, it's occluded.
   }
 
-  // --- Slow Path: 'Survivor' Point-in-Polygon Check ---
+  //#endregion
+  //#region Slow Path
+
+  // --- 'Survivor' Point-in-Polygon Check ---
   const currentPolygon = projectTo2D(currentFace.corners, direction);
   const opposingPolygons = opposingFaces.map(f => projectTo2D(f.corners, direction));
 
@@ -93,8 +98,7 @@ export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], dir
   return true;
 }
 
-
-// --- Helper Functions ---
+//#region Utils
 
 function getFaceBounds(faceData: FaceData) {
   const min = { x: Infinity, y: Infinity, z: Infinity };
@@ -132,3 +136,5 @@ function isPointInPolygon(point: Point2D, polygon: Point2D[]): boolean {
   }
   return isInside;
 }
+
+//#endregion
