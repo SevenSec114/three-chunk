@@ -7,7 +7,7 @@ const EPSILON = 0.0001;
 type Point2D = { x: number, y: number };
 
 /**
- * The main culling logic (V4 - Hybrid Algorithm with Planarity Check).
+ * The main culling logic (Hybrid Algorithm with Planarity Check).
  * It uses a fast path for simple cases and a slow path for complex cases.
  */
 export function isOccluded(currentFace: FaceData, opposingFaces: FaceData[], direction: BlockDirection): boolean {

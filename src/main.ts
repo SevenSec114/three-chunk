@@ -44,8 +44,8 @@ world.regenerate();
 
 // GUI
 const gui = new GUI();
-const settings = { debug: false, showChunkBounds: false };
-gui.add(settings, 'debug').onChange((value: boolean) => {
+const settings = { wireframeMode: false, showChunkBounds: false };
+gui.add(settings, 'wireframeMode').name('Wireframe Mode').onChange((value: boolean) => {
   world.toggleWireframe(value);
 });
 

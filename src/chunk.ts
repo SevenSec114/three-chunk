@@ -22,6 +22,7 @@ function computeIndex(x: number, y: number, z: number) {
 
 export class Chunk {
   private readonly position: THREE.Vector3;
+  private readonly offset: THREE.Vector3;
   private scene: THREE.Scene;
   private world: World;
   private blocks: (BlockData | null)[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH).fill(null);
@@ -29,11 +30,12 @@ export class Chunk {
   private wireframeMesh: THREE.LineSegments | null = null;
   private debugMeshGenerator: DebugMeshGenerator;
   private debugMesh: THREE.Mesh | null = null;
-  private chunkBoundingBox: THREE.LineSegments | null = null; // 添加chunk边界框
+  private chunkBoundingBox: THREE.LineSegments | null = null;
 
   constructor(world: World, scene: THREE.Scene, position: THREE.Vector3) {
     this.world = world;
     this.position = position;
+    this.offset = new THREE.Vector3(-0.5, -0.5, -0.5);  // -0.5 for chunks to make bounds align with blocks' instead of the center
     this.scene = scene
     this.debugMeshGenerator = new DebugMeshGenerator();
   }
@@ -46,7 +48,7 @@ export class Chunk {
   }
 
   public getBlock(x: number, y: number, z: number): { block: Block | null, options?: Record<string, any> } {
-    if (x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_DEPTH) {
+    if (x < this.offset.x || x >= CHUNK_WIDTH + this.offset.x || y < this.offset.y || y >= CHUNK_HEIGHT + this.offset.y || z < this.offset.z || z >= CHUNK_DEPTH + this.offset.z) {
       const worldX = this.position.x * CHUNK_WIDTH + x;
       const worldY = this.position.y * CHUNK_HEIGHT + y;
       const worldZ = this.position.z * CHUNK_DEPTH + z;
@@ -108,11 +110,16 @@ export class Chunk {
             const currentFaces = currentBlock.getFaceData(direction, currentOptions);
             if (currentFaces.length === 0) continue;
 
+            // Get one of the neighbors
             const neighborPos = [x + directionVectors[direction][0], y + directionVectors[direction][1], z + directionVectors[direction][2]];
             const { block: neighborBlock, options: neighborOptions } = this.getBlock(neighborPos[0], neighborPos[1], neighborPos[2]);
 
             const opposingFaces = (neighborBlock && neighborBlock.isOpaque)
-              ? neighborBlock.getFaceData(direction.includes('Positive') ? direction.replace('Positive', 'Negative') as BlockDirection : direction.replace('Negative', 'Positive') as BlockDirection, neighborOptions)
+              ? neighborBlock.getFaceData(
+                direction.includes('Positive')
+                ? direction.replace('Positive', 'Negative') as BlockDirection
+                : direction.replace('Negative', 'Positive') as BlockDirection
+              , neighborOptions)
               : [];
 
             // Check if face is visible and add indices into current chunk
@@ -198,7 +205,7 @@ export class Chunk {
       );
 
       // Set position
-      const offset = new THREE.Vector3(CHUNK_WIDTH / 2, CHUNK_HEIGHT / 2, CHUNK_DEPTH / 2);
+      const offset = new THREE.Vector3(CHUNK_WIDTH / 2, CHUNK_HEIGHT / 2, CHUNK_DEPTH / 2).add(this.offset);
       this.chunkBoundingBox.position.copy(this.position).multiplyScalar(CHUNK_WIDTH).add(offset);
 
       this.scene.add(this.chunkBoundingBox);
